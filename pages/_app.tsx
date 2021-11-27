@@ -1,32 +1,23 @@
-import React from 'react';
-import App, { Container } from 'next/app';
-import Page from '../components/Page';
-import { ApolloProvider } from 'react-apollo';
-import withData from '../lib/withData';
+// lib/withApollo.js
+import withApollo from 'next-with-apollo';
+import ApolloClient, { InMemoryCache } from 'apollo-boost';
+import { ApolloProvider } from '@apollo/react-hooks';
+import { endpoint } from '../config';
 
-class MyApp extends App {
-  static async getInitialProps({ Component, ctx }) {
-    let pageProps = {};
-    if (Component.getInitialProps) {
-      pageProps = await Component.getInitialProps(ctx);
-    }
-    // Exposes the query to the user
-    pageProps.query = ctx.query;
-    return { pageProps };
-  }
-  render() {
-    const { Component, apollo, pageProps } = this.props;
-
-    return (
-      <Container>
-        <ApolloProvider client={apollo}>
-          <Page>
-            <Component {...pageProps} />
-          </Page>
+export default withApollo(
+  ({ initialState }) => {
+    return new ApolloClient({
+      uri: endpoint,
+      cache: new InMemoryCache().restore(initialState || {}),
+    });
+  },
+  {
+    render: ({ Page, props }) => {
+      return (
+        <ApolloProvider client={props.apollo}>
+          <Page {...props} />
         </ApolloProvider>
-      </Container>
-    );
-  }
-}
-
-export default withData(MyApp);
+      );
+    },
+  },
+);

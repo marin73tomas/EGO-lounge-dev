@@ -20,9 +20,22 @@
     "plugins": [
       {
         "name": "typescript-tslint-plugin",
-        "configFile": "./tslint.json",
+        "configFile": "./tslint.json"
       }
     ],
-    "jsx": "react"
-  }
+    "jsx": "preserve",
+    "forceConsistentCasingInFileNames": true,
+    "incremental": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
