@@ -1,4 +1,6 @@
 const express = require('express');
+const { graphqlHTTP } = require('express-graphql');
+const graphql = require('graphql');
 const helmet = require('helmet');
 const xss = require('xss-clean');
 const mongoSanitize = require('express-mongo-sanitize');
@@ -13,7 +15,7 @@ const { authLimiter } = require('./middlewares/rateLimiter');
 const routes = require('./routes/v1');
 const { errorConverter, errorHandler } = require('./middlewares/error');
 const ApiError = require('./utils/ApiError');
-
+const { schema, root } = require('./schemas');
 const app = express();
 
 if (config.env !== 'test') {
@@ -22,7 +24,7 @@ if (config.env !== 'test') {
 }
 
 // set security HTTP headers
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false }));
 
 // parse json request body
 app.use(express.json());
@@ -44,6 +46,16 @@ app.options('*', cors());
 // jwt authentication
 app.use(passport.initialize());
 passport.use('jwt', jwtStrategy);
+
+//register graphql route
+app.use(
+  '/graphql',
+  graphqlHTTP({
+    schema: schema,
+    rootValue: root,
+    graphiql: true,
+  })
+);
 
 // limit repeated failed requests to auth endpoints
 if (config.env === 'production') {
